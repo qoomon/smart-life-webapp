@@ -22,3 +22,11 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+
+### Notes
+API
+* https://www.home-assistant.io/integrations/tuya/
+Icons:
+* https://icons8.com/icons/set/clapperboard
+
