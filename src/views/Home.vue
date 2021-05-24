@@ -19,9 +19,12 @@
   <div id="devices">
     <div v-for="device in devices" :key="device.id">
       <el-card class="device">
-        <el-avatar :src="device.icon" shape="square">
-          <img src="/device_icons/default.png"/>
-        </el-avatar>
+        <el-tooltip effect="light" :content="device.type" offset="-20"
+          :visible-arrow="false">
+          <el-avatar :src="device.icon" shape="square">
+            <img src="/device_icons/default.png"/>
+          </el-avatar>
+        </el-tooltip>
         <span class="device-name">{{ device.name }}</span>
         <template v-if="device.type === 'scene'">
           <el-button type="default" circle class="icon-big trigger"
