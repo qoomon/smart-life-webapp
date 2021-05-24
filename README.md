@@ -1,5 +1,10 @@
 # smart-life-webapp
 
+Simple [Vercel](https://vercel.com/) webapp to control [Smart Life](https://www.ismartlife.me/) devices and scenes.
+
+## Demo
+https://smart-life.vercel.app/
+
 ## Project setup
 ```
 npm install
@@ -15,18 +20,7 @@ npm run serve
 npm run build
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
-
 ### Notes
-API
-* https://www.home-assistant.io/integrations/tuya/
-Icons:
-* https://icons8.com/icons/set/clapperboard
+* **tuya API** https://www.home-assistant.io/integrations/tuya/
+* **Icons** https://icons8.com/icons/set/clapperboard
 
