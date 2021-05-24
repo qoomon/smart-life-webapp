@@ -1,19 +1,25 @@
 <template>
-  <el-form id="login" :model="loginForm" ref="form" inline=true>
-    <el-form-item label="Email address" size="medium">
-      <el-input v-model="loginForm.username"></el-input>
-    </el-form-item>
-    <el-form-item label="Password">
-      <el-input type="password" v-model="loginForm.password"></el-input>
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="connect()">Connect</el-button>
-    </el-form-item>
-  </el-form>
-  <div>
+  <div id="nav">
+    <el-form v-if="!loginState" :model="loginForm" ref="form" :inline="true">
+      <el-form-item label="Email address" size="medium">
+        <el-input v-model="loginForm.username"></el-input>
+      </el-form-item>
+      <el-form-item label="Password">
+        <el-input type="password" v-model="loginForm.password"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="login()">Login</el-button>
+      </el-form-item>
+    </el-form>
+    <template v-else>
+      <el-button type="default" @click="refreshDevices()">Refresh</el-button>
+      <el-button type="default" @click="logout()">Logout</el-button>
+    </template>
+  </div>
+  <div id="devices">
     <div v-for="device in devices" :key="device.id">
       <el-card class="device">
-        <el-avatar :src="device.icon">
+        <el-avatar :src="device.icon" shape="square">
           <img src="/device_icons/default.png"/>
         </el-avatar>
         <span class="device-name">{{ device.name }}</span>
@@ -51,6 +57,11 @@ function createClient () {
   })
 }
 
+function dropSession () {
+  session = null
+  client = null
+}
+
 async function newSession (userName, password, region) {
   region = region || defaults.region
 
@@ -67,7 +78,7 @@ async function newSession (userName, password, region) {
     bizType: 'smart_life',
     from: 'tuya'
   }))
-  // console.debug('auth.do', authResponse.data)
+  console.debug('auth.do', userName, authResponse.data)
   session.token = authResponse.data
   localStorage.setItem('session', JSON.stringify(session))
 }
@@ -134,7 +145,7 @@ async function deviceControl (deviceId, action, fieldValue, fieldName) {
       [fieldName]: fieldValue
     }
   })
-  console.debug(`device control ${action}: ${fieldName}=${fieldValue}`, controlResponse.data)
+  console.debug('device control', `${action}: ${fieldName}=${fieldValue}`, controlResponse.data)
   return controlResponse.data
 }
 
@@ -143,6 +154,7 @@ export default {
   components: {},
   data () {
     return {
+      loginState: false,
       loginForm: {
         username: '',
         password: ''
@@ -151,12 +163,18 @@ export default {
     }
   },
   methods: {
-    async connect () {
+    async login () {
       await newSession(
         this.loginForm.username,
         this.loginForm.password
       )
+      this.loginState = true
       await this.refreshDevices()
+    },
+    async logout () {
+      dropSession()
+      this.loginState = false
+      this.devices = []
     },
     async refreshDevices () {
       // TODO handle expired session
@@ -173,7 +191,7 @@ export default {
         }))
         localStorage.setItem('devices', JSON.stringify(this.devices))
       } else {
-        this.$message.error('Oops, device discovery error.')
+        this.$message.error(`Oops, device discovery error. (${discoveryCode})`)
       }
     },
     async toggleDevice (device) {
@@ -181,33 +199,37 @@ export default {
       // TODO change icon to el-icon-loading
       const newState = !device.data.state
       const controlResponse = await deviceControl(device.id, 'turnOnOff', newState)
-      if (controlResponse.header.code === 'SUCCESS') {
+      const controlCode = controlResponse.header.code
+      if (controlCode === 'SUCCESS') {
         device.data.state = newState
       } else {
-        this.$message.error('Oops, device control error.')
+        this.$message.error(`Oops, device control error. (${controlCode})`)
       }
     },
     async triggerScene (device) {
       // TODO handle expired session
       // TODO change icon to el-icon-loading
       const controlResponse = await deviceControl(device.id, 'turnOnOff', true)
-      if (controlResponse.header.code === 'SUCCESS') {
+      const controlCode = controlResponse.header.code
+      if (controlCode === 'SUCCESS') {
         // do nothing
         // todo user feedback
       } else {
-        this.$message.error('Oops, device control error.')
+        this.$message.error(`Oops, device control error. (${controlCode})`)
       }
     }
   },
   async mounted () {
     // TODO handle expired session
     this.devices = JSON.parse(localStorage.getItem('devices')) || []
+    this.loginState = !!session
   }
 }
 </script>
 <style scoped>
-#login {
+#nav {
   margin: 0 auto;
+  margin-top: 64px;
   margin-bottom: 64px;
 }
 
