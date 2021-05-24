@@ -18,7 +18,7 @@
   </div>
   <div id="devices">
     <div v-for="device in devices" :key="device.id">
-      <el-card class="device">
+      <el-card class="device" :style="device.data.online === false ? 'filter: opacity(0.65) grayscale(1);' : ''">
         <el-tooltip effect="light" :content="device.type" offset="-20"
           :visible-arrow="false">
           <el-avatar :src="device.icon" shape="square">
