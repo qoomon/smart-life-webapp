@@ -80,14 +80,18 @@ onMounted(async () => {
 })
 
 const login = async () => {
-  await homeAssistantClient.login(
-    loginForm.value.username,
-    loginForm.value.password
-  )
-  localStorage.setItem('session', JSON.stringify(homeAssistantClient.getSession()))
-  loginState.value = true
-  loginForm.value = { username: '', password: '' }
-  await refreshDevices()
+  try {
+    await homeAssistantClient.login(
+      loginForm.value.username,
+      loginForm.value.password
+    )
+    localStorage.setItem('session', JSON.stringify(homeAssistantClient.getSession()))
+    loginState.value = true
+    loginForm.value = { username: '', password: '' }
+    refreshDevices()
+  } catch (err) {
+    ElMessage.error(`Oops, login error. (${err})`)
+  }
 }
 
 const logout = () => {
@@ -100,41 +104,35 @@ const logout = () => {
 
 const refreshDevices = async () => {
   // TODO handle expired session
-  // get device list
-  const discoveryResponse = await homeAssistantClient.deviceDiscovery()
-  const discoveryCode = discoveryResponse.header.code
-  if (discoveryCode === 'SUCCESS') {
+  try {
+    const discoveryResponse = await homeAssistantClient.deviceDiscovery()
     const discoveryDevices = discoveryResponse.payload.devices || []
     devices.value = discoveryDevices
     localStorage.setItem('devices', JSON.stringify(discoveryDevices))
-  } else {
-    ElMessage.error(`Oops, device discovery error. (${discoveryCode})`)
+  } catch (err) {
+    ElMessage.error(`Oops, device discovery error. (${err})`)
   }
 }
 
 const toggleDevice = async (device) => {
   // TODO handle expired session
   // TODO change icon to el-icon-loading
-  const newState = !device.data.state
-  const controlResponse = await homeAssistantClient.deviceControl(device.id, 'turnOnOff', newState)
-  const controlCode = controlResponse.header.code
-  if (controlCode === 'SUCCESS') {
+  try {
+    const newState = !device.data.state
+    await homeAssistantClient.deviceControl(device.id, 'turnOnOff', newState)
     device.data.state = newState
-  } else {
-    ElMessage.error(`Oops, device control error. (${controlCode})`)
+  } catch (err) {
+    ElMessage.error(`Oops, device control error. (${err})`)
   }
 }
 
 const triggerScene = async (device) => {
   // TODO handle expired session
   // TODO change icon to el-icon-loading
-  const controlResponse = await homeAssistantClient.deviceControl(device.id, 'turnOnOff', true)
-  const controlCode = controlResponse.header.code
-  if (controlCode === 'SUCCESS') {
-    // do nothing
-    // todo user feedback
-  } else {
-    ElMessage.error(`Oops, device control error. (${controlCode})`)
+  try {
+    await homeAssistantClient.deviceControl(device.id, 'turnOnOff', true)
+  } catch (err) {
+    ElMessage.error(`Oops, device control error. (${err})`)
   }
 }
 </script>

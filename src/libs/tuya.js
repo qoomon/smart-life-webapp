@@ -27,6 +27,9 @@ function HomeAssistantClient (session) {
       from: 'tuya'
     }))
     console.debug('auth.do', userName, authResponse.data)
+    if (authResponse.data.responseStatus === 'error') {
+      throw new Error(authResponse.errorMsg)
+    }
 
     session = {
       region,
@@ -41,6 +44,10 @@ function HomeAssistantClient (session) {
       rand: Math.random()
     })
     console.debug('access.do', accessResponse.data)
+    if (accessResponse.data.responseStatus === 'error') {
+      throw new Error(accessResponse.errorMsg)
+    }
+
     session.token = accessResponse.data
   }
 
@@ -59,15 +66,10 @@ function HomeAssistantClient (session) {
         accessToken: session.token.access_token
       }
     })
-
-    if (typeof discoveryResponse.data !== 'object') {
-      discoveryResponse.data = {
-        header: {
-          code: discoveryResponse.data
-        }
-      }
-    }
     console.debug('device discovery response', discoveryResponse.data)
+    if (typeof discoveryResponse.data !== 'object') {
+      throw new Error(discoveryResponse.data)
+    }
 
     const payload = discoveryResponse.data.payload
     if (payload && payload.devices) {
@@ -97,7 +99,6 @@ function HomeAssistantClient (session) {
         .filter(device => device.type !== 'automation')
     }
 
-    console.debug('device discovery result', discoveryResponse.data)
     return discoveryResponse.data
   }
 
@@ -129,7 +130,9 @@ function HomeAssistantClient (session) {
       }
     })
     console.debug('device control response', `${action}: ${fieldName}=${fieldValue}`, controlResponse.data)
-    return controlResponse.data
+    if (controlResponse.data.header.code !== 'SUCCESS') {
+      throw new Error(controlResponse.data.header.code)
+    }
   }
 }
 
