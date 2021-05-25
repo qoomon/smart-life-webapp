@@ -17,11 +17,11 @@
     </template>
   </div>
   <div id="devices">
-    <div v-for="device in devices" :key="device.id">
+    <div v-for="device in devicesSorted" :key="device.id">
       <el-card class="device" :style="device.data.online === false ? 'filter: opacity(0.65) grayscale(1);' : ''">
-        <el-tooltip effect="light" :content="device.type" offset="-20"
+        <el-tooltip effect="light" :content="device.type" :offset="-20"
           :visible-arrow="false">
-          <el-avatar :src="device.icon" shape="square">
+          <el-avatar :src="`/device_icons/${device.type}.png`" shape="square">
             <img src="/device_icons/default.png"/>
           </el-avatar>
         </el-tooltip>
@@ -44,113 +44,11 @@
 </template>
 
 <script>
-import axios from 'axios'
+import tuya from '@/libs/tuya'
 
-const defaults = {
-  region: 'eu'
-}
-
-let session = JSON.parse(localStorage.getItem('session'))
-let client = session ? createClient() : null
-
-function createClient () {
-  return axios.create({
-    baseURL: '/api/homeassistant',
-    params: { region: session.region }
-  })
-}
-
-function dropSession () {
-  session = null
-  client = null
-}
-
-async function newSession (userName, password, region) {
-  region = region || defaults.region
-
-  session = {
-    region,
-    userName
-  }
-  client = createClient()
-
-  const authResponse = await client.post('/auth.do', new URLSearchParams({
-    userName,
-    password,
-    countryCode: '00',
-    bizType: 'smart_life',
-    from: 'tuya'
-  }))
-  console.debug('auth.do', userName, authResponse.data)
-  session.token = authResponse.data
-  localStorage.setItem('session', JSON.stringify(session))
-}
-
-// TODO
-// async function refreshSessionToken() {
-//   const accessResponse = await client.post('/access.do', {
-//     grant_type: 'refresh_token',
-//     refresh_token: session.token.refresh_token,
-//     rand: Math.random()
-//   })
-//   console.debug('access.do', accessResponse.data)
-//   session.token = authResponse.data
-//   localStorage.setItem('session', JSON.stringify(session))
-// }
-
-async function deviceDiscovery () {
-  const discoveryResponse = await client.post('/skill', {
-    header: {
-      payloadVersion: 1,
-      namespace: 'discovery',
-      name: 'Discovery'
-    },
-    payload: {
-      accessToken: session.token.access_token
-    }
-  })
-
-  if (typeof discoveryResponse.data !== 'object') {
-    discoveryResponse.data = {
-      header: {
-        code: discoveryResponse.data
-      }
-    }
-  }
-  console.debug('device discovery', discoveryResponse.data)
-  return discoveryResponse.data
-}
-
-// actions = ['turnOnOff', 'brightnessSet', 'colorSet', 'colorTemperatureSet']
-async function deviceControl (deviceId, action, fieldValue, fieldName) {
-  // for testing purpose only
-  if (deviceId === 0) {
-    return { header: { code: 'SUCCESS' } }
-  }
-
-  fieldName = fieldName || 'value'
-
-  if (action === 'turnOnOff' &&
-    fieldName === 'value' &&
-    typeof fieldValue === 'boolean') {
-    fieldValue = fieldValue ? 1 : 0
-  }
-
-  const controlResponse = await client.post('/skill', {
-    header: {
-      payloadVersion: 1,
-      namespace: 'control',
-      name: action
-    },
-    payload: {
-      accessToken: session.token.access_token,
-      devId: deviceId,
-      [fieldName]: fieldValue
-    }
-  })
-  console.debug('device control', `${action}: ${fieldName}=${fieldValue}`, controlResponse.data)
-  return controlResponse.data
-}
+const homeAssistantClient = new tuya.HomeAssistantClient(
+  JSON.parse(localStorage.getItem('session'))
+)
 
 export default {
   name: 'Home',
@@ -165,33 +63,38 @@ export default {
       devices: []
     }
   },
+  computed: {
+    devicesSorted () {
+      return [...this.devices].sort((d1, d2) => {
+        const v1 = d1.data.online === false ? 1 : 0
+        const v2 = d2.data.online === false ? 1 : 0
+        return v1 > v2 ? 1 : -1
+      })
+    }
+  },
   methods: {
     async login () {
-      await newSession(
+      await homeAssistantClient.login(
         this.loginForm.username,
         this.loginForm.password
       )
+      localStorage.setItem('session', JSON.stringify(homeAssistantClient.getSession()))
       this.loginState = true
       await this.refreshDevices()
     },
     async logout () {
-      dropSession()
+      homeAssistantClient.dropSession()
+      localStorage.clear()
       this.loginState = false
       this.devices = []
     },
     async refreshDevices () {
       // TODO handle expired session
       // get device list
-      const discoveryResponse = await deviceDiscovery()
+      const discoveryResponse = await homeAssistantClient.deviceDiscovery()
       const discoveryCode = discoveryResponse.header.code
       if (discoveryCode === 'SUCCESS') {
-        this.devices = discoveryResponse.payload.devices.map(device => ({
-          id: device.id,
-          name: JSON.parse(`"${device.name}"`),
-          type: device.dev_type,
-          data: device.data,
-          icon: `/device_icons/${device.dev_type}.png` // device.icon
-        }))
+        this.devices = discoveryResponse.payload.devices
         localStorage.setItem('devices', JSON.stringify(this.devices))
       } else {
         this.$message.error(`Oops, device discovery error. (${discoveryCode})`)
@@ -201,7 +104,7 @@ export default {
       // TODO handle expired session
       // TODO change icon to el-icon-loading
       const newState = !device.data.state
-      const controlResponse = await deviceControl(device.id, 'turnOnOff', newState)
+      const controlResponse = await homeAssistantClient.deviceControl(device.id, 'turnOnOff', newState)
       const controlCode = controlResponse.header.code
       if (controlCode === 'SUCCESS') {
         device.data.state = newState
@@ -212,7 +115,7 @@ export default {
     async triggerScene (device) {
       // TODO handle expired session
       // TODO change icon to el-icon-loading
-      const controlResponse = await deviceControl(device.id, 'turnOnOff', true)
+      const controlResponse = await homeAssistantClient.deviceControl(device.id, 'turnOnOff', true)
       const controlCode = controlResponse.header.code
       if (controlCode === 'SUCCESS') {
         // do nothing
@@ -224,8 +127,11 @@ export default {
   },
   async mounted () {
     // TODO handle expired session
+    this.loginState = !!homeAssistantClient.getSession()
+    if (!this.loginState) {
+      localStorage.clear()
+    }
     this.devices = JSON.parse(localStorage.getItem('devices')) || []
-    this.loginState = !!session
   }
 }
 </script>
