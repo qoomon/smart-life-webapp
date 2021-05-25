@@ -4,6 +4,19 @@ const defaults = {
   region: 'eu'
 }
 
+function ensureSuccess (response) {
+  const data = response.data
+  if (typeof data !== 'object') {
+    throw new Error(data)
+  }
+  if (data.responseStatus === 'error') {
+    throw new Error(data.errorMsg)
+  }
+  if (!data.header || data.header.code !== 'SUCCESS') {
+    throw new Error(data.header.msg)
+  }
+}
+
 function HomeAssistantClient (session) {
   let client
   if (session) {
@@ -27,9 +40,7 @@ function HomeAssistantClient (session) {
       from: 'tuya'
     }))
     console.debug('auth.do', userName, authResponse.data)
-    if (authResponse.data.responseStatus === 'error') {
-      throw new Error(authResponse.errorMsg)
-    }
+    ensureSuccess(authResponse)
 
     session = {
       region,
@@ -44,9 +55,7 @@ function HomeAssistantClient (session) {
       rand: Math.random()
     })
     console.debug('access.do', accessResponse.data)
-    if (accessResponse.data.responseStatus === 'error') {
-      throw new Error(accessResponse.errorMsg)
-    }
+    ensureSuccess(accessResponse)
 
     session.token = accessResponse.data
   }
@@ -67,9 +76,7 @@ function HomeAssistantClient (session) {
       }
     })
     console.debug('device discovery response', discoveryResponse.data)
-    if (typeof discoveryResponse.data !== 'object') {
-      throw new Error(discoveryResponse.data)
-    }
+    ensureSuccess(discoveryResponse)
 
     const payload = discoveryResponse.data.payload
     if (payload && payload.devices) {
@@ -130,9 +137,7 @@ function HomeAssistantClient (session) {
       }
     })
     console.debug('device control response', `${action}: ${fieldName}=${fieldValue}`, controlResponse.data)
-    if (controlResponse.data.header.code !== 'SUCCESS') {
-      throw new Error(controlResponse.data.header.code)
-    }
+    ensureSuccess(controlResponse)
   }
 }
 
