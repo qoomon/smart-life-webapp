@@ -26,6 +26,15 @@ function HomeAssistantClient (session) {
   function createClient (region) {
     return axios.create({ baseURL: '/api/homeassistant', params: { region } })
   }
+  
+  function normalizeToken (token) {
+    const result = { 
+      ...token,
+      expires: Math.trunc((Date.now() / 1000)) + token.expires_in
+    }
+    delete result.expires_in
+    return result
+  }
 
   this.login = async (userName, password, region) => {
     region = region || defaults.region
@@ -44,7 +53,7 @@ function HomeAssistantClient (session) {
 
     session = {
       region,
-      token: authResponse.data
+      token: normalizeToken(authResponse.data)
     }
   }
 
@@ -57,7 +66,7 @@ function HomeAssistantClient (session) {
     console.debug('access.do', accessResponse.data)
     ensureSuccess(accessResponse)
 
-    session.token = accessResponse.data
+    session.token = normalizeToken(accessResponse.data)
   }
 
   this.getSession = () => session
