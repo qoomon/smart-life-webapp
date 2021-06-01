@@ -9,6 +9,9 @@ function ensureSuccess (response) {
   if (typeof data !== 'object') {
     throw new Error(data)
   }
+  if (data.access_token) {
+    return
+  }
   if (data.responseStatus === 'error') {
     throw new Error(data.errorMsg)
   }
