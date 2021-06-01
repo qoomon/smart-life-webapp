@@ -26,9 +26,9 @@ function HomeAssistantClient (session) {
   function createClient (region) {
     return axios.create({ baseURL: '/api/homeassistant', params: { region } })
   }
-  
+
   function normalizeToken (token) {
-    const result = { 
+    const result = {
       ...token,
       expires: Math.trunc((Date.now() / 1000)) + token.expires_in
     }
