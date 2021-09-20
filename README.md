@@ -5,6 +5,10 @@ Simple [Vercel](https://vercel.com/) webapp to control [Smart Life](https://www.
 ## Website
 https://smart-life.vercel.app/
 
+* a SmartLife account created with email and password
+  * Accounts linked to Google does not work for some unknown reasons
+
+
 ## Project setup
 ```
 npm install
