@@ -4,9 +4,6 @@
 
 <style>
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons+Round");
-.el-icon-material {
-  font-family: 'Material Icons Round' !important;
-}
 
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

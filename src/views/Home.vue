@@ -27,26 +27,29 @@
         </el-tooltip>
         <span class="device-name">{{ device.name }}</span>
         <template v-if="device.type === 'scene'">
-          <el-button type="default" circle class="icon-big trigger"
+          <el-button type="default" circle size="large"
+            class="trigger"
             @click="triggerScene(device);"
-          ><i class="el-icon-material">play_arrow</i></el-button>
+          ><i class="material-icons-round">play_arrow</i></el-button>
         </template>
         <template v-else>
-          <el-button type="default" circle class="icon-big"
+          <el-button type="default" circle size="large"
             :class="device.data.state ? 'state-on' : 'state-off'"
             :disabled="!device.data.online"
             @click="toggleDevice(device);"
-          ><i class="el-icon-material">{{ device.data.online ? 'power_settings_new' : 'cloud_off' }}</i></el-button>
+          ><i class="material-icons-round">{{ device.data.online ? 'power_settings_new' : 'cloud_off' }}</i></el-button>
         </template>
       </el-card>
     </div>
   </div>
 </template>
+
 <script>
 export default {
   name: 'Home'
 }
 </script>
+
 <script setup="" >
 /* eslint-disable no-unused-vars */
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -136,6 +139,7 @@ const triggerScene = async (device) => {
   }
 }
 </script>
+
 <style scoped>
 #nav {
   margin: 0 auto;
@@ -148,20 +152,13 @@ const triggerScene = async (device) => {
   margin: 0 auto;
   margin-bottom: 16px;
 }
-
-.el-card.device >>> .el-card__body {
+.el-card.device :deep(.el-card__body) {
   display: flex;
   justify-content: flex-start;
   align-items: center;
 }
-.el-card.device >>> .el-card__body :last-child {
+.el-card.device :deep(.el-card__body :last-child) {
   margin-left: auto;
-}
-
-.el-button.icon-big {
-  padding: 9px;
-  font-size: 20px;
-  line-height: 0px;
 }
 
 .el-button.state-on:enabled {
@@ -176,6 +173,12 @@ const triggerScene = async (device) => {
   color: #f9f9f9;
   background-color: #9eabce;
 }
+.el-button.el-button--large {
+  padding: 9px;
+  font-size: 20px;
+  line-height: 0px;
+}
+
 
 .el-avatar {
   background: transparent;

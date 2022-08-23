@@ -96,12 +96,8 @@ function HomeAssistantClient (session) {
       payload.devices = payload.devices
         .map(device => {
           // workaround automation type
-          if (device.dev_type === 'scene') {
-            if (device.name.endsWith('#')) {
-              device.name = device.name.replace(/ *#$/, '')
-            } else {
-              device.dev_type = 'automation'
-            }
+          if (device.dev_type === 'scene' && device.name.endsWith('#')) {
+            device.dev_type = 'automation'
           }
 
           // workaround json escaped signes
