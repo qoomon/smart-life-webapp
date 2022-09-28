@@ -95,13 +95,14 @@ function HomeAssistantClient (session) {
       // fix payload data
       payload.devices = payload.devices
         .map(device => {
+          // workaround json escaped signes
+          device.name = JSON.parse(`"${device.name}"`)
+        
           // workaround automation type
           if (device.dev_type === 'scene' && device.name.endsWith('#')) {
             device.dev_type = 'automation'
+            device.name = device.name.replace(/\s*#$/, '')
           }
-
-          // workaround json escaped signes
-          device.name = JSON.parse(`"${device.name}"`)
 
           return {
             id: device.id,
