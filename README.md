@@ -3,7 +3,8 @@
 Simple [Vercel](https://vercel.com/) webapp to control [Smart Life](https://www.ismartlife.me/) devices and scenes.
 
 > [!IMPORTANT]
-> You need to postfix your `automation` names with `#`, otherwise they will be displayed as `scenes` (this needed is due to a api issue)
+> You need to postfix your `automation` names with `#`, otherwise they will be displayed as `scenes`
+> This is needed due to work around the tuya API
 
 ## Website
 https://smart-life.vercel.app/
