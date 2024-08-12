@@ -10,10 +10,12 @@ export default createProxyMiddleware({
   pathRewrite: {
     '^/api/homeassistant': '' // strip "/api" from the URL
   },
-  onProxyReq(proxyReq) {
+  on: {
+    proxyReq(proxyReq) {
       const proxyReqUrl = new URL(proxyReq.path, `${proxyReq.protocol}//${proxyReq.host}`)
       proxyReqUrl.searchParams.delete('region')
       proxyReqUrl.searchParams.delete('[...path]')
       proxyReq.path = proxyReqUrl.pathname + proxyReqUrl.search
+    }
   }
 })
