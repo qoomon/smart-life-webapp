@@ -12,7 +12,7 @@
     "axios": "^1.7.7",
     "element-plus": "^2.8.2",
     "http-proxy-middleware": "^3.0.0",
-    "vue": "^3.4.35",
+    "vue": "^3.5.3",
     "vue-router": "^4.4.3",
     "vuex": "^4.1.0"
   },
