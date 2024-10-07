@@ -11,7 +11,7 @@
     "@element-plus/theme-chalk": "^2.2.16",
     "axios": "^1.7.7",
     "element-plus": "^2.8.3",
-    "http-proxy-middleware": "^3.0.2",
+    "http-proxy-middleware": "^3.0.3",
     "vue": "^3.5.11",
     "vue-router": "^4.4.5",
     "vuex": "^4.1.0"
