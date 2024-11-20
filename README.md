@@ -1,4 +1,4 @@
-# smart-life-webapp [![starline](https://github-starline.vercel.app/qoomon/smart-life-webapp)](https://github.com/qoomon/starline)
+# smart-life-webapp [![starline](https://starlines.qoo.monster/assets/qoomon/smart-life-webapp)](https://github.com/qoomon/starlines)
 
 Simple [Vercel](https://vercel.com/) webapp to control [Smart Life](https://www.ismartlife.me/) devices and scenes.
 
