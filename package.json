@@ -2,6 +2,9 @@
   "name": "smart-life-webapp",
   "version": "0.1.0",
   "private": true,
+  "engines" : { 
+    "node" : ">=22.0.0"
+  }
   "scripts": {
     "serve": "vercel dev",
     "build": "vue-cli-service build",
