@@ -13,7 +13,7 @@
   "dependencies": {
     "@element-plus/theme-chalk": "^2.2.16",
     "axios": "^1.9.0",
-    "element-plus": "^2.9.11",
+    "element-plus": "^2.10.1",
     "http-proxy-middleware": "^3.0.5",
     "vue": "^3.5.16",
     "vue-router": "^4.5.1",
