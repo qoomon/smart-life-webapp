@@ -25,6 +25,6 @@
     "@vue/cli-plugin-vuex": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/eslint-config-standard": "^8.0.1",
-    "vercel": "^41.7.8"
+    "vercel": "^44.7.3"
   }
 }
