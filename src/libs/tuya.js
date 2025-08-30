@@ -1,5 +1,3 @@
-import axios from 'axios'
-
 const defaults = {
   region: 'eu'
 }
@@ -27,7 +25,46 @@ function HomeAssistantClient (session) {
   }
 
   function createClient (region) {
-    return axios.create({ baseURL: '/api/homeassistant', params: { region } })
+    const base = '/api/homeassistant'
+    async function post (path, body) {
+      const url = new URL(base + path, window.location.origin)
+      url.searchParams.set('region', region)
+
+      let headers = {}
+      let payload = body
+
+      // Support URLSearchParams for form-encoded auth.do
+      if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) {
+        headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        payload = body.toString()
+      } else if (body && typeof body === 'object' && !(body instanceof Blob) && !(body instanceof ArrayBuffer)) {
+        headers['Content-Type'] = 'application/json'
+        payload = JSON.stringify(body)
+      }
+
+      const res = await fetch(url.toString(), {
+        method: 'POST',
+        headers,
+        body: payload
+      })
+
+      const contentType = res.headers.get('content-type') || ''
+      let data
+      if (contentType.includes('application/json')) {
+        data = await res.json()
+      } else {
+        const text = await res.text()
+        try { data = JSON.parse(text) } catch { data = text }
+      }
+
+      return {
+        status: res.status,
+        headers: res.headers,
+        data
+      }
+    }
+
+    return { post }
   }
 
   function normalizeToken (token) {
