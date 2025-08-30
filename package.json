@@ -6,7 +6,7 @@
     "node" : ">=22.0.0"
   },
   "scripts": {
-    "serve": "vercel dev",
+    "serve": "wrangler pages dev dist",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -24,6 +24,6 @@
     "@vue/cli-plugin-vuex": "^5.0.9",
     "@vue/cli-service": "^5.0.9",
     "@vue/eslint-config-standard": "^8.0.1",
-    "vercel": "^46.0.2"
+    "wrangler": "^3.73.0"
   }
 }
