@@ -34,7 +34,7 @@
         </template>
         <template v-else>
           <el-button type="default" circle size="large"
-            :class="device.data.state ? 'state-on' : 'state-off'"
+            :class="getState(device.data.state) ? 'state-on' : 'state-off'"
             :disabled="!device.data.online"
             @click="toggleDevice(device);"
           ><i class="material-icons-round">{{ device.data.online ? 'power_settings_new' : 'cloud_off' }}</i></el-button>
@@ -116,7 +116,7 @@ export default {
       // TODO handle expired session
       // TODO change icon to el-icon-loading
       try {
-        const newState = !device.data.state
+        const newState = !getState(device.data.state)
         await homeAssistantClient.deviceControl(device.id, 'turnOnOff', newState)
         device.data.state = newState
       } catch (err) {
@@ -134,6 +134,16 @@ export default {
       }
     }
 
+     const  getState = (state) => {
+      if (state === false || state === null || state === undefined || state === 0) {
+        return false;
+      }
+      if (typeof state === 'string' && state.toLowerCase() === 'false') {
+        return false;
+      }
+      return Boolean(state);
+    }
+
     return {
       loginState,
       devices,
@@ -143,7 +153,8 @@ export default {
       logout,
       refreshDevices,
       toggleDevice,
-      triggerScene
+      triggerScene,
+      getState
     }
   }
 }
