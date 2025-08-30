@@ -1,5 +1,15 @@
 <template>
   <div id="nav">
+    <div v-if="!isOnline" class="offline-banner">
+      <el-alert type="warning" title="You are offline. Some actions are disabled." show-icon />
+    </div>
+    <div v-else-if="showIosA2hsHint" class="ios-a2hs-banner">
+      <el-alert type="info" show-icon>
+        <template #title>
+          Add to Home Screen: Tap the Share button, then "Add to Home Screen" to install.
+        </template>
+      </el-alert>
+    </div>
     <el-form v-if="!loginState" :model="loginForm" :inline="true">
       <el-form-item label="Email address" size="medium">
         <el-input v-model="loginForm.username"></el-input>
@@ -8,11 +18,11 @@
         <el-input type="password" v-model="loginForm.password"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="login()">Login</el-button>
+        <el-button type="primary" :disabled="!isOnline" @click="login()">Login</el-button>
       </el-form-item>
     </el-form>
     <template v-else>
-      <el-button type="default" @click="refreshDevices()">Refresh</el-button>
+      <el-button type="default" :disabled="!isOnline" @click="refreshDevices()">Refresh</el-button>
       <el-button type="default" @click="logout()">Logout</el-button>
     </template>
   </div>
@@ -29,13 +39,14 @@
         <template v-if="device.type === 'scene'">
           <el-button type="default" circle size="large"
             class="trigger"
+            :disabled="!isOnline"
             @click="triggerScene(device);"
           ><i class="material-icons-round">play_arrow</i></el-button>
         </template>
         <template v-else>
           <el-button type="default" circle size="large"
-            :class="device.data.state ? 'state-on' : 'state-off'"
-            :disabled="!device.data.online"
+            :class="getState(device.data.state) ? 'state-on' : 'state-off'"
+            :disabled="!device.data.online || !isOnline"
             @click="toggleDevice(device);"
           ><i class="material-icons-round">{{ device.data.online ? 'power_settings_new' : 'cloud_off' }}</i></el-button>
         </template>
@@ -53,9 +64,13 @@ export default {
 <script setup="" >
 /* eslint-disable no-unused-vars */
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage } from "element-plus"
+import { ElMessage } from 'element-plus'
+import { useOnline } from '@/composables/useOnline'
+import { getState } from './../utils'
 
 import tuya from '@/libs/tuya'
+
+const { isOnline } = useOnline()
 
 const homeAssistantClient = new tuya.HomeAssistantClient(
   JSON.parse(localStorage.getItem('session'))
@@ -65,7 +80,7 @@ const loginState = ref(false)
 const devices = ref([])
 
 const devicesSorted = computed(() => {
-  const order = { true: 0, undefined: 1, false: 2 }
+  const order = { true: 0, undefined: 1, false: 2 } 
   return devices.value.slice().sort((d1, d2) =>
     order[d1.data.online] > order[d2.data.online] ? 1 : -1
   )
@@ -73,16 +88,30 @@ const devicesSorted = computed(() => {
 
 const loginForm = ref({ username: '', password: '' })
 
+// Simple iOS A2HS hint when not installed
+const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent)
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+const showIosA2hsHint = computed(() => isIOS && !isStandalone)
+
 onMounted(async () => {
   // TODO handle expired session
   loginState.value = !!homeAssistantClient.getSession()
   if (!loginState.value) {
     localStorage.clear()
   }
+  // Load cached devices so UI renders even if offline
   devices.value = JSON.parse(localStorage.getItem('devices')) || []
+  // If online, refresh immediately
+  if (isOnline.value && loginState.value) {
+    refreshDevices()
+  }
 })
 
 const login = async () => {
+  if (!isOnline.value) {
+    ElMessage.warning('You are offline. Please connect to the internet to login.')
+    return
+  }
   try {
     await homeAssistantClient.login(
       loginForm.value.username,
@@ -106,6 +135,10 @@ const logout = () => {
 }
 
 const refreshDevices = async () => {
+  if (!isOnline.value) {
+    ElMessage.info('Offline. Showing the last known devices list.')
+    return
+  }
   // TODO handle expired session
   try {
     const discoveryResponse = await homeAssistantClient.deviceDiscovery()
@@ -118,10 +151,14 @@ const refreshDevices = async () => {
 }
 
 const toggleDevice = async (device) => {
+  if (!isOnline.value) {
+    ElMessage.warning('You are offline. Actions are disabled.')
+    return
+  }
   // TODO handle expired session
   // TODO change icon to el-icon-loading
   try {
-    const newState = !device.data.state
+    const newState = !getState(device.data.state)
     await homeAssistantClient.deviceControl(device.id, 'turnOnOff', newState)
     device.data.state = newState
   } catch (err) {
@@ -130,6 +167,10 @@ const toggleDevice = async (device) => {
 }
 
 const triggerScene = async (device) => {
+  if (!isOnline.value) {
+    ElMessage.warning('You are offline. Actions are disabled.')
+    return
+  }
   // TODO handle expired session
   // TODO change icon to el-icon-loading
   try {
@@ -145,6 +186,16 @@ const triggerScene = async (device) => {
   margin: 0 auto;
   margin-top: 64px;
   margin-bottom: 64px;
+}
+
+.offline-banner {
+  max-width: 800px;
+  margin: 0 auto 16px auto;
+}
+
+.ios-a2hs-banner {
+  max-width: 800px;
+  margin: 0 auto 16px auto;
 }
 
 .el-card.device {

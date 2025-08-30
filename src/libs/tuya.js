@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { safeDebug } from '@/utils/logger'
 
 const defaults = {
   region: 'eu'
@@ -51,7 +52,7 @@ function HomeAssistantClient (session) {
       bizType: 'smart_life',
       from: 'tuya'
     }))
-    console.debug('auth.do', userName, authResponse.data)
+    safeDebug('auth.do', userName)
     ensureSuccess(authResponse)
 
     session = {
@@ -66,7 +67,7 @@ function HomeAssistantClient (session) {
       refresh_token: session.token.refresh_token,
       rand: Math.random()
     })
-    console.debug('access.do', accessResponse.data)
+    safeDebug('access.do')
     ensureSuccess(accessResponse)
 
     session.token = normalizeToken(accessResponse.data)
@@ -87,7 +88,7 @@ function HomeAssistantClient (session) {
         accessToken: session.token.access_token
       }
     })
-    console.debug('device discovery response', discoveryResponse.data)
+    safeDebug('device discovery response')
     ensureSuccess(discoveryResponse)
 
     const payload = discoveryResponse.data.payload
@@ -96,7 +97,7 @@ function HomeAssistantClient (session) {
       payload.devices = payload.devices
         .map(device => {
           // workaround json escaped signes
-          device.name = JSON.parse(`"${device.name}"`)
+          device.name = JSON.parse(`\"${device.name}\"`)
         
           // workaround automation type
           if (device.dev_type === 'scene' && device.name.endsWith('#')) {
@@ -130,6 +131,7 @@ function HomeAssistantClient (session) {
     if (action === 'turnOnOff' &&
       fieldName === 'value' &&
       typeof fieldValue === 'boolean') {
+        // eslint-disable-next-line no-param-reassign
       fieldValue = fieldValue ? 1 : 0
     }
 
@@ -145,7 +147,7 @@ function HomeAssistantClient (session) {
         [fieldName]: fieldValue
       }
     })
-    console.debug('device control response', `${action}: ${fieldName}=${fieldValue}`, controlResponse.data)
+    safeDebug('device control response', `${action}: ${fieldName}=${fieldValue}`)
     ensureSuccess(controlResponse)
   }
 }

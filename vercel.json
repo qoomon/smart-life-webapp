@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "routes": [
+    { "src": "^/api/(.*)$", "dest": "/api/$1" },
+
+    { "src": "^/service-worker\\.js$", "headers": { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" } },
+    { "src": "^/workbox-.*\\.js$", "headers": { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" } },
+    { "src": "^/precache-manifest\\..*\\.js$", "headers": { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" } },
+    { "src": "^/manifest\\.json$", "headers": { "Content-Type": "application/manifest+json; charset=utf-8", "Cache-Control": "public, max-age=600, must-revalidate" } },
+
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
