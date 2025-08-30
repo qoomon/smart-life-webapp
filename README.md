@@ -21,14 +21,16 @@ Important: Postfix your automation names with a trailing `#` if you want them tr
    ```bash
    npm ci
    ```
-2) Build
+2) Vite dev server (fast HMR)
    ```bash
-   npm run build
+   npm run dev
    ```
-3) Start Pages dev (serves `dist` with functions)
+   Note: this serves the SPA only. API routes (/api/homeassistant/*) are provided by Cloudflare Pages Functions and are not available via the Vite dev server unless you proxy them manually.
+3) Cloudflare Pages dev (SPA + Functions together)
    ```bash
    npm run serve
    ```
+   This builds the SPA with Vite and runs `wrangler pages dev dist`, serving dist/ along with the functions under functions/.
 4) Open http://127.0.0.1:8788
 
 ## Build

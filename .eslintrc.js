@@ -14,10 +14,7 @@ module.exports = {
     parser: '@babel/eslint-parser',
     requireConfigFile: false,
     ecmaVersion: 2022,
-    sourceType: 'module',
-    babelOptions: {
-      presets: ['@vue/cli-plugin-babel/preset']
-    }
+    sourceType: 'module'
   },
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
