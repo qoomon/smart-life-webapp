@@ -8,8 +8,7 @@ export const onRequest: PagesFunction = async ({ request, params }) => {
   const region = (reqUrl.searchParams.get('region') || 'eu').toLowerCase();
   reqUrl.searchParams.delete('region');
 
-  // params.path may be string or string[] depending on runtime
-  const seg = Array.isArray(params.path) ? params.path.join('/') : (params.path || '');
+  const seg = typeof params.path === 'string' ? params.path : '';
   const restPath = seg ? `/${seg}` : '';
   const upstream = new URL(`https://px1.tuya${region}.com/homeassistant${restPath}`);
   reqUrl.searchParams.forEach((v, k) => upstream.searchParams.append(k, v));
