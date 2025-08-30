@@ -45,97 +45,106 @@
 </template>
 
 <script>
-export default {
-  name: 'Home'
-}
-</script>
-
-<script setup="" >
-/* eslint-disable no-unused-vars */
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage } from "element-plus"
-
+import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import tuya from '@/libs/tuya'
 
-const homeAssistantClient = new tuya.HomeAssistantClient(
-  JSON.parse(localStorage.getItem('session'))
-)
-
-const loginState = ref(false)
-const devices = ref([])
-
-const devicesSorted = computed(() => {
-  const order = { true: 0, undefined: 1, false: 2 }
-  return devices.value.slice().sort((d1, d2) =>
-    order[d1.data.online] > order[d2.data.online] ? 1 : -1
-  )
-})
-
-const loginForm = ref({ username: '', password: '' })
-
-onMounted(async () => {
-  // TODO handle expired session
-  loginState.value = !!homeAssistantClient.getSession()
-  if (!loginState.value) {
-    localStorage.clear()
-  }
-  devices.value = JSON.parse(localStorage.getItem('devices')) || []
-})
-
-const login = async () => {
-  try {
-    await homeAssistantClient.login(
-      loginForm.value.username,
-      loginForm.value.password
+export default {
+  name: 'Home',
+  setup () {
+    const homeAssistantClient = new tuya.HomeAssistantClient(
+      JSON.parse(localStorage.getItem('session'))
     )
-    localStorage.setItem('session', JSON.stringify(homeAssistantClient.getSession()))
-    loginState.value = true
-    loginForm.value = { username: '', password: '' }
-    refreshDevices()
-  } catch (err) {
-    ElMessage.error(`Oops, login error. (${err})`)
-  }
-}
 
-const logout = () => {
-  homeAssistantClient.dropSession()
-  localStorage.clear()
-  loginState.value = false
-  loginForm.value = { username: '', password: '' }
-  devices.value = []
-}
+    const loginState = ref(false)
+    const devices = ref([])
 
-const refreshDevices = async () => {
-  // TODO handle expired session
-  try {
-    const discoveryResponse = await homeAssistantClient.deviceDiscovery()
-    const discoveryDevices = discoveryResponse.payload.devices || []
-    devices.value = discoveryDevices
-    localStorage.setItem('devices', JSON.stringify(discoveryDevices))
-  } catch (err) {
-    ElMessage.error(`Oops, device discovery error. (${err})`)
-  }
-}
+    const devicesSorted = computed(() => {
+      const order = { true: 0, undefined: 1, false: 2 }
+      return devices.value.slice().sort((d1, d2) =>
+        order[d1.data.online] > order[d2.data.online] ? 1 : -1
+      )
+    })
 
-const toggleDevice = async (device) => {
-  // TODO handle expired session
-  // TODO change icon to el-icon-loading
-  try {
-    const newState = !device.data.state
-    await homeAssistantClient.deviceControl(device.id, 'turnOnOff', newState)
-    device.data.state = newState
-  } catch (err) {
-    ElMessage.error(`Oops, device control error. (${err})`)
-  }
-}
+    const loginForm = ref({ username: '', password: '' })
 
-const triggerScene = async (device) => {
-  // TODO handle expired session
-  // TODO change icon to el-icon-loading
-  try {
-    await homeAssistantClient.deviceControl(device.id, 'turnOnOff', true)
-  } catch (err) {
-    ElMessage.error(`Oops, device control error. (${err})`)
+    onMounted(async () => {
+      // TODO handle expired session
+      loginState.value = !!homeAssistantClient.getSession()
+      if (!loginState.value) {
+        localStorage.clear()
+      }
+      devices.value = JSON.parse(localStorage.getItem('devices')) || []
+    })
+
+    const login = async () => {
+      try {
+        await homeAssistantClient.login(
+          loginForm.value.username,
+          loginForm.value.password
+        )
+        localStorage.setItem('session', JSON.stringify(homeAssistantClient.getSession()))
+        loginState.value = true
+        loginForm.value = { username: '', password: '' }
+        refreshDevices()
+      } catch (err) {
+        ElMessage.error(`Oops, login error. (${err})`)
+      }
+    }
+
+    const logout = () => {
+      homeAssistantClient.dropSession()
+      localStorage.clear()
+      loginState.value = false
+      loginForm.value = { username: '', password: '' }
+      devices.value = []
+    }
+
+    const refreshDevices = async () => {
+      // TODO handle expired session
+      try {
+        const discoveryResponse = await homeAssistantClient.deviceDiscovery()
+        const discoveryDevices = discoveryResponse.payload.devices || []
+        devices.value = discoveryDevices
+        localStorage.setItem('devices', JSON.stringify(discoveryDevices))
+      } catch (err) {
+        ElMessage.error(`Oops, device discovery error. (${err})`)
+      }
+    }
+
+    const toggleDevice = async (device) => {
+      // TODO handle expired session
+      // TODO change icon to el-icon-loading
+      try {
+        const newState = !device.data.state
+        await homeAssistantClient.deviceControl(device.id, 'turnOnOff', newState)
+        device.data.state = newState
+      } catch (err) {
+        ElMessage.error(`Oops, device control error. (${err})`)
+      }
+    }
+
+    const triggerScene = async (device) => {
+      // TODO handle expired session
+      // TODO change icon to el-icon-loading
+      try {
+        await homeAssistantClient.deviceControl(device.id, 'turnOnOff', true)
+      } catch (err) {
+        ElMessage.error(`Oops, device control error. (${err})`)
+      }
+    }
+
+    return {
+      loginState,
+      devices,
+      devicesSorted,
+      loginForm,
+      login,
+      logout,
+      refreshDevices,
+      toggleDevice,
+      triggerScene
+    }
   }
 }
 </script>
@@ -178,7 +187,6 @@ const triggerScene = async (device) => {
   font-size: 20px;
   line-height: 0px;
 }
-
 
 .el-avatar {
   background: transparent;

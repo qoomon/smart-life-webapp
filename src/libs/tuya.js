@@ -30,7 +30,7 @@ function HomeAssistantClient (session) {
       const url = new URL(base + path, window.location.origin)
       url.searchParams.set('region', region)
 
-      let headers = {}
+      const headers = {}
       let payload = body
 
       // Support URLSearchParams for form-encoded auth.do
@@ -134,7 +134,7 @@ function HomeAssistantClient (session) {
         .map(device => {
           // workaround json escaped signes
           device.name = JSON.parse(`"${device.name}"`)
-        
+
           // workaround automation type
           if (device.dev_type === 'scene' && device.name.endsWith('#')) {
             device.dev_type = 'automation'
