@@ -1,0 +1,4 @@
+name = "smart-life-webapp"
+compatibility_date = "2025-08-30"
+pages_build_output_dir = "dist"
+
