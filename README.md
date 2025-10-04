@@ -7,7 +7,7 @@ Simple [Vercel](https://vercel.com/) webapp to control [Smart Life](https://www.
 > This is needed to work around the tuya API
 
 ## Website
-https://smart-life.vercel.app/
+[https://smart-life-app.netlify.app/](https://smart-life-app.netlify.app/)
 
 * Only SmartLife accounts created with email and password are supported.
   * Accounts linked to Google does not work for some unknown reasons
