@@ -27,7 +27,7 @@ function HomeAssistantClient (session) {
   }
 
   function createClient (region) {
-    return axios.create({ baseURL: '/api/homeassistant', params: { region } })
+    return axios.create({ baseURL: `https://px1.tuya${region}.com/homeassistant`})
   }
 
   function normalizeToken (token) {
@@ -97,7 +97,7 @@ function HomeAssistantClient (session) {
         .map(device => {
           // workaround json escaped signes
           device.name = JSON.parse(`"${device.name}"`)
-        
+
           // workaround automation type
           if (device.dev_type === 'scene' && device.name.endsWith('#')) {
             device.dev_type = 'automation'
