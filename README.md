@@ -7,7 +7,7 @@ Simple webapp to control [Smart Life](https://www.ismartlife.me/) devices and sc
 > This is needed to work around the tuya API
 
 ## Website
-[https://smart-life-app.netlify.app/](https://smart-life-app.netlify.app/)
+https://qoomon.github.io/smart-life-webapp/
 
 * Only SmartLife accounts created with email and password are supported.
   * Accounts linked to Google does not work for some unknown reasons
