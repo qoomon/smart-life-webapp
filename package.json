@@ -6,7 +6,7 @@
     "node" : ">=22.0.0"
   },
   "vue": {
-    "publicPath": "/smart-life-webapp"
+    "publicPath": "/smart-life-webapp/"
   },
   "scripts": {
     "build": "vue-cli-service build",
