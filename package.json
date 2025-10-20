@@ -18,7 +18,7 @@
     "element-plus": "^2.11.5",
     "http-proxy-middleware": "^3.0.5",
     "vue": "^3.5.22",
-    "vue-router": "^4.5.1",
+    "vue-router": "^4.6.3",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
