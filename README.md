@@ -1,4 +1,4 @@
-# smart-life-webapp [![starline](https://starlines.qoo.monster/assets/qoomon/smart-life-webapp)](https://github.com/qoomon/starlines)
+# smart-life-webapp [![starline](https://raw.githubusercontent.com/qoomon/qoomon/refs/heads/main/starlines/qoomon/smart-life-webapp/starline.svg)](https://github.com/qoomon/starlines)
 
 Simple webapp to control [Smart Life](https://www.ismartlife.me/) devices and scenes.
 
